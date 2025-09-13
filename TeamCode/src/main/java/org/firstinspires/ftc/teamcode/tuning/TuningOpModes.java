@@ -11,7 +11,6 @@ import com.acmerobotics.roadrunner.ftc.DeadWheelDirectionDebugger;
 import com.acmerobotics.roadrunner.ftc.DriveType;
 import com.acmerobotics.roadrunner.ftc.DriveView;
 import com.acmerobotics.roadrunner.ftc.DriveViewFactory;
-import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.acmerobotics.roadrunner.ftc.EncoderGroup;
 import com.acmerobotics.roadrunner.ftc.EncoderRef;
 import com.acmerobotics.roadrunner.ftc.ForwardPushTest;
@@ -41,8 +40,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.OTOSLocalizer;
-import org.firstinspires.ftc.teamcode.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.ThreeDeadWheelLocalizer;
 
 import java.util.ArrayList;
