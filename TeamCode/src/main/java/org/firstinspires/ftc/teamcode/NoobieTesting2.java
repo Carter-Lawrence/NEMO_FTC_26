@@ -46,8 +46,8 @@ public class NoobieTesting2 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         MecanumDrive drive = new MecanumDrive(hardwareMap, STARTING_POSE);
 
-        TrajectoryActionBuilder placeSpecimen1 = drive.actionBuilder(new Pose2d(45, -55, Math.toRadians(90)))
-
+        TrajectoryActionBuilder placeSpecimen1 = drive.actionBuilder(new Pose2d(0, 0, Math.toRadians(90)))
+                .strafeTo(new Vector2d(20, 0))
 
                 ;
         waitForStart();
