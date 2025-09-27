@@ -89,7 +89,7 @@ public class RedCloseAuto extends LinearOpMode {
                 .splineTo(new Vector2d(56, -55), Math.toRadians(-90))
                 .strafeToLinearHeading(new Vector2d(45,-55), Math.toRadians(-90));
 //
-//                .stopAndAdd(wrist.wristUp())
+//                .stopAndAdd(wrist.wristUp())asdlf
 //                .stopAndAdd(pivot.pivotDown(600))
 //                .stopAndAdd(lift.liftUp(-300))
 //                .stopAndAdd(intake.intakeUp())
@@ -169,8 +169,8 @@ public class RedCloseAuto extends LinearOpMode {
          );**/
         Actions.runBlocking(//lift arm and move to specimen at same time
                 new ParallelAction(
-                        pivot.pivotUp(800),
-                        lift.liftUp(-2200),
+                        //pivot.pivotUp(800),
+                        //lift.liftUp(-2200),
                         placeSpecimen.build(),
                         pushSamples.build(),
                         placeSpecimen1.build(),
