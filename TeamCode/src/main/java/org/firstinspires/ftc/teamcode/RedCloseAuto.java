@@ -169,8 +169,8 @@ public class RedCloseAuto extends LinearOpMode {
          );**/
         Actions.runBlocking(//lift arm and move to specimen at same time
                 new ParallelAction(
-                        pivot.pivotUp(800),
-                        lift.liftUp(-2200),
+                        //pivot.pivotUp(800),
+                        //lift.liftUp(-2200),
                         placeSpecimen.build(),
                         pushSamples.build(),
                         placeSpecimen1.build(),
