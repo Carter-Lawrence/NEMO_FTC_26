@@ -52,7 +52,7 @@ public final class TuningOpModes {
 
     public static final String GROUP = "quickstart";
     public static final boolean DISABLED = false;
-
+//safljsa;ldfkjsa;ldfkjasdf
     private TuningOpModes() {}
 
     private static OpModeMeta metaForClass(Class<? extends OpMode> cls) {
@@ -94,7 +94,6 @@ public final class TuningOpModes {
                     parEncs.add(new EncoderRef(0, 0));
                     parEncs.add(new EncoderRef(0, 1));
                     perpEncs.add(new EncoderRef(0, 2));
-
                 } else {
                     throw new RuntimeException("unknown localizer: " + md.localizer.getClass().getName());
                 }
