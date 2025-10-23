@@ -34,8 +34,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="OnePersonOpMode", group="Linear OpMode")
-public class OnePersonOpMode extends LinearOpMode {
+@TeleOp(name="MainOpMode", group="Linear OpMode")
+public class MainOpMode extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
