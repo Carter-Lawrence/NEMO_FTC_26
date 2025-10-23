@@ -74,6 +74,13 @@ public class MainOpMode extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
+    private DcMotorEx fly1 = null;
+    private DcMotorEx fly2 = null;
+    private DcMotor intake = null;
+    private Servo led = null;
+    private Servo hood = null;
+    private Servo trans = null;
+
 
     @Override
     public void runOpMode() {
