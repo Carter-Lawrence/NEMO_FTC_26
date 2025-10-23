@@ -68,6 +68,9 @@ public class OnePersonOpMode extends LinearOpMode {
     boolean up1Pressed = false;
     boolean right1Pressed = false;
     boolean left1Pressed = false;
+    boolean is = false
+
+    boolean l1
 
     boolean lb2Pressed = false;
     boolean rb2Pressed = false;
@@ -79,6 +82,8 @@ public class OnePersonOpMode extends LinearOpMode {
     boolean up2Pressed = false;
     boolean right2Pressed = false;
     boolean left2Pressed = false;
+
+
 
     @Override
     public void runOpMode() {
