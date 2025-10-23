@@ -69,17 +69,8 @@ public class OnePersonOpMode extends LinearOpMode {
     boolean right1Pressed = false;
     boolean left1Pressed = false;
 
-    boolean lb2Pressed = false;
-    boolean rb2Pressed = false;
-    boolean b2Pressed = false;
-    boolean a2Pressed = false;
-    boolean x2Pressed = false;
-    boolean y2Pressed = false;
-    boolean down2Pressed = false;
-    boolean up2Pressed = false;
-    boolean right2Pressed = false;
-    boolean left2Pressed = false;
-
+    float left2Pressed = 0;
+    float right2Pressed = 0;
     @Override
     public void runOpMode() {
 
@@ -146,18 +137,18 @@ public class OnePersonOpMode extends LinearOpMode {
             }
 
             // Intake speed adjust
-            if (gamepad1.r1) {
+            if (gamepad1.right_bumper) {
                 intakeSpeed = Range.clip(intakeSpeed + 0.01, 0, 1);
             }
-            if (gamepad1.l1) {
+            if (gamepad1.left_bumper) {
                 intakeSpeed = Range.clip(intakeSpeed - 0.01, 0, 1);
             }
 
             // Flywheel toggle
-            if (gamepad1.r2) {
+            if (gamepad1.right_trigger > 0.25) {
                 fly1.setPower(flySpeed);
                 fly2.setPower(flySpeed);
-            } else if (gamepad1.l2) {
+            } else if (gamepad1.left_trigger > 0.25) {
                 fly1.setPower(-flySpeed);
                 fly2.setPower(-flySpeed);
             } else {
@@ -203,7 +194,8 @@ public class OnePersonOpMode extends LinearOpMode {
             up1Pressed = gamepad1.dpad_up;
             left1Pressed = gamepad1.dpad_left;
             right1Pressed = gamepad1.dpad_right;
-
+            left2Pressed = gamepad1.left_trigger;
+            right2Pressed = gamepad1.right_trigger;
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Intake Power", intake.getPower());
             telemetry.addData("Intake Speed", intakeSpeed);
