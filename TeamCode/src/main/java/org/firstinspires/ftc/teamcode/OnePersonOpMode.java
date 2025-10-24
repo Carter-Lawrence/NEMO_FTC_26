@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,14 +17,17 @@ public class OnePersonOpMode extends LinearOpMode {
 
     // MECHANISMS
     private DcMotor intake;
-    private DcMotorEx fly1, fly2;
-    private Servo vertTrans;  // Linear actuator
-    private Servo trans;      // Lift servo
+    private DcMotor fly1, fly2;
+    private Servo vertTrans;  // Vertical actuator
+    private CRServo trans;    // Continuous lift servo
     private Servo spin;       // Spin Dexter servo
 
     // BUTTON DEBOUNCE
     private boolean vertPressed = false;
     private boolean spinPressed = false;
+    private boolean flyOn = false;
+
+    private double spinZero = 20.0 / 180.0; // start at 20°
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -36,15 +40,15 @@ public class OnePersonOpMode extends LinearOpMode {
         backLeft   = hardwareMap.get(DcMotor.class, "bl");
         backRight  = hardwareMap.get(DcMotor.class, "br");
 
-        fly1       = hardwareMap.get(DcMotorEx.class, "fly1");
-        fly2       = hardwareMap.get(DcMotorEx.class, "fly2");
+        fly1       = hardwareMap.get(DcMotor.class, "fly1");
+        fly2       = hardwareMap.get(DcMotor.class, "fly2");
         intake     = hardwareMap.get(DcMotor.class, "in");
 
         vertTrans  = hardwareMap.get(Servo.class,"trans1");
-        trans      = hardwareMap.get(Servo.class,"trans2");
+        trans      = hardwareMap.get(CRServo.class,"trans2");
         spin       = hardwareMap.get(Servo.class,"spin");
 
-        // MOTOR DIRECTIONS
+        // DIRECTIONS
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -54,10 +58,9 @@ public class OnePersonOpMode extends LinearOpMode {
         fly2.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
 
-        // INITIAL SERVO POSITIONS
         vertTrans.setPosition(0);
-        trans.setPosition(0);
-        spin.setPosition(0);
+        trans.setPower(0);
+        spin.setPosition(spinZero);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -67,9 +70,7 @@ public class OnePersonOpMode extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-
-            // DRIVE CONTROL
-
+            // ---------- DRIVE (optional) ----------
             double axial   = -gamepad1.left_stick_y;
             double lateral = gamepad1.left_stick_x;
             double yaw     = gamepad1.right_stick_x;
@@ -79,7 +80,6 @@ public class OnePersonOpMode extends LinearOpMode {
             double blPow = axial - lateral + yaw;
             double brPow = axial + lateral - yaw;
 
-            // Normalize powers
             double max = Math.max(Math.abs(flPow), Math.abs(frPow));
             max = Math.max(max, Math.abs(blPow));
             max = Math.max(max, Math.abs(brPow));
@@ -95,68 +95,53 @@ public class OnePersonOpMode extends LinearOpMode {
             backLeft.setPower(blPow);
             backRight.setPower(brPow);
 
+            // ---------- INTAKE ----------
+            double intakeSpeed = Range.clip(gamepad1.right_trigger - gamepad1.left_trigger, -1.0, 1.0);
+            intake.setPower(intakeSpeed);
 
-            // INTAKE / OUTTAKE
+            // ---------- FLYWHEELS ----------
+            if(gamepad1.right_bumper) flyOn = true;
+            if(gamepad1.left_bumper) flyOn = false;
 
-            // Speed adjust with R1/L1
-            double intakeSpeed = 0.5 + 0.5 * (gamepad1.right_trigger - gamepad1.left_trigger); // 0 to 1
-
-            if (gamepad1.x) {
-                intake.setPower(intakeSpeed);  // Intake in
-            } else if (gamepad1.y) {
-                intake.setPower(-intakeSpeed); // Intake out
-            } else {
-                intake.setPower(0);
-            }
-
-
-            // FLYWHEELS
-
-            if (gamepad1.right_bumper) {
+            if(flyOn){
                 fly1.setPower(1.0);
                 fly2.setPower(1.0);
-            } else if (gamepad1.left_bumper) {
+            } else {
                 fly1.setPower(0);
                 fly2.setPower(0);
             }
 
-
-            // VERTICAL SERVO (Linear actuator)
-
-            if (gamepad1.a && !vertPressed) {
-                vertTrans.setPosition(1.0);
+            // ---------- VERTICAL SERVO ----------
+            if(gamepad1.a && !vertPressed){
+                vertTrans.setPosition(0.0); // move down
                 vertPressed = true;
-            } else if (!gamepad1.a) {
+            } else if(!gamepad1.a){
                 vertPressed = false;
             }
 
-
-            // TRANS SERVO (lift)
-
-            if (gamepad1.dpad_up) {
-                trans.setPosition(1.0);
-            } else if (gamepad1.dpad_down) {
-                trans.setPosition(0.0);
+            // ---------- TRANS SERVO ----------
+            if(gamepad1.dpad_up){
+                trans.setPower(1.0);
+            } else {
+                trans.setPower(0);
             }
 
-
-            // SPIN DEXTER SERVO
-
-            if (gamepad1.b && !spinPressed) {
-                double newPos = spin.getPosition() + 0.1;
-                if (newPos > 1.0) newPos = 1.0;
+            // ---------- SPIN DEXTER ----------
+            if(gamepad1.b && !spinPressed){
+                spinZero = 0; // reset relative zero
+                double newPos = spin.getPosition() + 120.0/180.0;
+                if(newPos > 1.0) newPos -= 1.0; // wrap
                 spin.setPosition(newPos);
                 spinPressed = true;
-            } else if (!gamepad1.b) {
+            } else if(!gamepad1.b){
                 spinPressed = false;
             }
-            // TELEMETRY
-            telemetry.addData("Status", "Running");
-            telemetry.addData("Intake Power", intake.getPower());
-            telemetry.addData("Fly Power", "Fly1: %.2f Fly2: %.2f", fly1.getPower(), fly2.getPower());
-            telemetry.addData("VertTrans Pos", vertTrans.getPosition());
-            telemetry.addData("Trans Pos", trans.getPosition());
-            telemetry.addData("Spin Pos", spin.getPosition());
+
+            // ---------- TELEMETRY ----------
+            telemetry.addData("Intake", intake.getPower());
+            telemetry.addData("Flywheels", flyOn);
+            telemetry.addData("VertTrans", vertTrans.getPosition());
+            telemetry.addData("Spin", spin.getPosition());
             telemetry.update();
 
             sleep(20);

@@ -63,6 +63,9 @@ public class SensorOctoQuad extends LinearOpMode {
     private final int ODO_RIGHT = 1; // Facing forward direction on right side or robot (Axial motion)
     private final int ODO_PERP  = 2; // Facing perpendicular direction at the center of the robot (Lateral motion)
 
+    private int velLeft;
+    private int velRight;
+    private int velPerp;
     // Declare the OctoQuad object and members to store encoder positions and velocities
     private OctoQuad    octoquad;
 
@@ -88,6 +91,7 @@ public class SensorOctoQuad extends LinearOpMode {
         octoquad.setSingleEncoderDirection(ODO_RIGHT, OctoQuad.EncoderDirection.FORWARD);
         octoquad.setSingleEncoderDirection(ODO_PERP,  OctoQuad.EncoderDirection.FORWARD);
 
+        octoquad.setAllVelocitySampleIntervals(50);
         // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
         octoquad.saveParametersToFlash();
 
@@ -117,9 +121,9 @@ public class SensorOctoQuad extends LinearOpMode {
             readOdometryPods();
 
             // Display the values.
-            telemetry.addData("Left ", "%8d counts", posLeft);
-            telemetry.addData("Right", "%8d counts", posRight);
-            telemetry.addData("Perp ", "%8d counts", posPerp);
+            telemetry.addData("Left  P", "%7d   V :%6d CPS ", posLeft, velLeft);
+            telemetry.addData("Right P", "%7d   V :%6d CPS ", posRight, velRight);
+            telemetry.addData("Perp  P", "%7d   V :%6d CPS ", posPerp, velPerp);
             telemetry.update();
         }
     }
@@ -133,9 +137,11 @@ public class SensorOctoQuad extends LinearOpMode {
         //
         // Since both calls take almost the same amount of time, and the actual channels may not end up
         // being sequential, we will read all of the encoder positions, and then pick out the ones we need.
-        int[] positions = octoquad.readAllPositions();
-        posLeft  = positions[ODO_LEFT];
-        posRight = positions[ODO_RIGHT];
-        posPerp  = positions[ODO_PERP];
+        posLeft  = octoquad.readSinglePosition_Caching(ODO_LEFT);
+        posRight = octoquad.readSinglePosition_Caching(ODO_RIGHT);
+        posPerp  = octoquad.readSinglePosition_Caching(ODO_PERP);
+        velLeft  = octoquad.readSingleVelocity_Caching(ODO_LEFT)  * 20;  // scale up to cps
+        velRight = octoquad.readSingleVelocity_Caching(ODO_RIGHT) * 20;  // scale up to cps
+        velPerp  = octoquad.readSingleVelocity_Caching(ODO_PERP)  * 20;
     }
 }

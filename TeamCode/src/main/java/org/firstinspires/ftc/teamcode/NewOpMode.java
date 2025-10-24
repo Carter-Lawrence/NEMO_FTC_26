@@ -32,8 +32,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -63,9 +67,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="MainOpMode", group="Linear OpMode")
+@TeleOp(name="NewOpMode", group="Linear OpMode")
 @Disabled
-public class MainOpMode extends LinearOpMode {
+public class NewOpMode extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -73,9 +77,54 @@ public class MainOpMode extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
+    private DcMotorEx fly1 = null;
+    private DcMotorEx fly2 = null;
+    private DcMotor intake = null;
+    private Servo spin = null;
+    private Servo trans2 = null;
+    private CRServo trans1 = null;
+
 
     @Override
     public void runOpMode() {
+
+        //DRIVE VARS
+        double  drive           = 0;
+        double  strafe          = 0;
+        double  turn            = 0;
+
+        //FLYWHEEL VARS
+        double flySpeed = 0;
+        boolean flyOn = false;
+        double lastTime = 0;
+        double transTime = 0;
+        boolean spinPressed = false;
+        //endregion
+
+        //region CONTROL VARS
+        //GAMEPAD 1
+        boolean lb1Pressed = false;
+        boolean rb1Pressed = false;
+        boolean b1Pressed = false;
+        boolean a1Pressed = false;
+        boolean x1Pressed = false;
+        boolean y1Pressed = false;
+        boolean down1Pressed = false;
+        boolean up1Pressed = false;
+        boolean right1Pressed = false;
+        boolean left1Pressed = false;
+        //GAMEPAD 2
+        boolean lb2Pressed = false;
+        boolean rb2Pressed = false;
+        boolean b2Pressed = false;
+        boolean a2Pressed = false;
+        boolean x2Pressed = false;
+        boolean y2Pressed = false;
+        boolean down2Pressed = false;
+        boolean up2Pressed = false;
+        boolean right2Pressed = false;
+        boolean left2Pressed = false;
+        //endregion
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -83,6 +132,13 @@ public class MainOpMode extends LinearOpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "back_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
+        fly1 = hardwareMap.get(DcMotorEx.class, "fly1");
+        fly2 = hardwareMap.get(DcMotorEx.class, "fly2");
+        intake = hardwareMap.get(DcMotor.class, "in");
+
+        spin = hardwareMap.get(Servo.class,"spin");
+        trans2 = hardwareMap.get(Servo.class,"trans2");
+        trans1 =  hardwareMap.get(CRServo.class,"trans1");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -94,10 +150,17 @@ public class MainOpMode extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        fly1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fly2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
-        backRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        fly1.setDirection(DcMotor.Direction.REVERSE);
+        fly2.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.FORWARD);
+        trans1.setDirection(CRServo.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -108,6 +171,68 @@ public class MainOpMode extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+                // Flywheel speed adjustment with triggers
+                if(gamepad1.right_trigger > 0 && (runtime.milliseconds() - lastTime > 250)) {
+                    flySpeed += 50;
+                    lastTime = runtime.milliseconds();
+                }
+                if(gamepad1.left_trigger > 0 && (runtime.milliseconds() - lastTime > 250)) {
+                    flySpeed -= (flySpeed > 0) ? 50 : 0;
+                    lastTime = runtime.milliseconds();
+                }
+
+            // FLYWHEEL CONTROLS
+            if(gamepad1.a && !a1Pressed)  {
+                flyOn = !flyOn;
+            }
+
+            // Set flywheel velocity
+            if(flyOn) {
+                fly1.setVelocity(flySpeed);
+                fly2.setVelocity(flySpeed);
+            } else {
+                fly1.setVelocity(0);
+                fly2.setVelocity(0);
+            }
+
+            //region INTAKE
+            if(gamepad1.right_bumper && !rb1Pressed) {
+                if(intake.getPower() <= 0) intake.setPower(1);
+                else intake.setPower(0);
+            }
+            //OUTTAKE
+            if(gamepad1.left_bumper && !lb1Pressed) {
+                intake.setPower(-0.6);
+            }
+            //endregion
+
+            // Transfer
+            if(gamepad1.y && !y1Pressed) {
+                trans1.setPower(1);       // Spin CRServo forward
+                trans2.setPosition(1);    // Move servo forward
+                transTime = runtime.milliseconds();
+            }
+
+            // Stop after 250 ms
+            double timeChange = runtime.milliseconds() - transTime;
+            if(timeChange >= 500) {
+                trans1.setPower(0);       // Stop CRServo
+                trans2.setPosition(0);    // Reset servo
+            }
+
+
+            if(gamepad1.b && !spinPressed){
+                double newPos = spin.getPosition() + 120.0/180.0;
+                if(newPos > 1.0) newPos -= 1.0; // wrap
+                spin.setPosition(newPos);
+                spinPressed = true;
+            } else if(!gamepad1.b){
+                spinPressed = false;
+            }
+
+            //endregion
+
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
@@ -134,6 +259,8 @@ public class MainOpMode extends LinearOpMode {
                 backLeftPower   /= max;
                 backRightPower  /= max;
             }
+
+
 
             // This is test code:
             //
@@ -164,4 +291,30 @@ public class MainOpMode extends LinearOpMode {
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.update();
         }
-    }}
+        //region CONTROL RESETS
+        b1Pressed = gamepad1.b;
+        a1Pressed = gamepad1.a;
+        x1Pressed = gamepad1.x;
+        y1Pressed = gamepad1.y;
+        down1Pressed = gamepad1.dpad_down;
+        up1Pressed = gamepad1.dpad_up;
+        left1Pressed = gamepad1.dpad_left;
+        right1Pressed = gamepad1.dpad_right;
+        lb1Pressed = gamepad1.left_bumper;
+        rb1Pressed = gamepad1.right_bumper;
+
+        b2Pressed = gamepad2.b;
+        a2Pressed = gamepad2.a;
+        x2Pressed = gamepad2.x;
+        y2Pressed = gamepad2.y;
+        down2Pressed = gamepad2.dpad_down;
+        up2Pressed = gamepad2.dpad_up;
+        left2Pressed = gamepad2.dpad_left;
+        right2Pressed = gamepad2.dpad_right;
+        lb2Pressed = gamepad2.left_bumper;
+        rb2Pressed = gamepad2.right_bumper;
+        //endregion
+
+    }
+}
+
